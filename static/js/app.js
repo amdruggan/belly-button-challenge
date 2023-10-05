@@ -167,6 +167,7 @@ function GaugeChart(subject) {
                 mode: "gauge+number",
 
                 // Sets the number of washes based on the subject ID (from the D3 read-in above)
+                // How do i make it so that if washes = null it will display 0?
                 value: washes,
 
                 // Sets the title of the gauge chart
