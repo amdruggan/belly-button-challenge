@@ -127,6 +127,7 @@ function MetaData(subject) {
     });
 }
 
+
 // Create a function that gets the washing frequency for a given subject ID, then plots the washing frequency on a plot.ly gauge chart
 function GaugeChart(subject) {
 
@@ -143,59 +144,111 @@ function GaugeChart(subject) {
         // This creates a variable for the number of washes
         let washes = result.wfreq;
 
-    });
+        // Defining some custom green shades
+        const customColors = [
+         "#f0fff0", // Very faint green
+        "#c1ffc1",
+        "#92ff92",
+        "#64ff64",
+        "#35ff35",
+        "#06ff06",
+        "#00e600",
+        "#00cc00",
+        "#00b300" // Saturated jewel tone green
+        ];
 
-    // This adds the number of washes to the gauge chart and also inputs al the variables for the gauge chart parameters
-    var GaugeData = [
-        {
-        // Type of gauge chart
-          type: "indicator",
+        // This adds the number of washes to the gauge chart and also inputs all the variables for the gauge chart parameters
+        var GaugeData = [
+            {
+                // Type of gauge chart
+                type: "indicator",
 
-        // Included modes (gauge and number)
-          mode: "gauge+number",
+                // Included modes (gauge and number)
+                mode: "gauge+number",
 
-        // Sets the number of washes based on the subject ID (from the D3 read in above)
-          value: washes,
+                // Sets the number of washes based on the subject ID (from the D3 read-in above)
+                value: washes,
 
-        // Sets the title of the gauge chart
-          title: { text: "Belly Button Washing Frequency", font: { size: 24 } },
+                // Sets the title of the gauge chart
+                title: { text: "Belly Button Washing Frequency", font: { size: 24 } },
 
-        // Sets the range of the gauge chart
-          gauge: {
-            axis: { range: [null, 9], tickwidth: 1, tickcolor: "darkblue" },
-            bar: { color: "darkblue" },
-            bgcolor: "white",
-            borderwidth: 2,
-            bordercolor: "gray",
-            steps: [
-              { range: [0, 1], color: "cyan" },
-              { range: [1, 2], color: "royalblue" },
-              { range: [2, 3], color: "cyan" },
-              { range: [3, 4], color: "royalblue" },
-              { range: [4, 5], color: "cyan" },
-              { range: [5, 6], color: "royalblue" },
-              { range: [6, 7], color: "cyan" },
-              { range: [7, 8], color: "royalblue" },
-              { range: [8, 9], color: "cyan" }
-            ],
-            threshold: {
-              line: { color: "red", width: 4 },
-              thickness: 0.5,
-              value: 9
+                // Sets the range of the gauge chart
+                gauge: {
+                    axis: { range: [null, 9], tickwidth: 1, tickcolor: "darkblue" },
+                    bar: { color: "darkblue" },
+                    bgcolor: "white",
+                    borderwidth: 2,
+                    bordercolor: "gray",
+                    steps: [
+                        { range: [0, 1], color: customColors[0] },
+                        { range: [1, 2], color: customColors[1] },
+                        { range: [2, 3], color: customColors[2] },
+                        { range: [3, 4], color: customColors[3] },
+                        { range: [4, 5], color: customColors[4] },
+                        { range: [5, 6], color: customColors[5] },
+                        { range: [6, 7], color: customColors[6] },
+                        { range: [7, 8], color: customColors[7] },
+                        { range: [8, 9], color: customColors[8] }
+                    ],
+                    threshold: {
+                        line: { color: "red", width: 4 },
+                        thickness: 0.5,
+                        value: 9
+                    }
+                }
             }
-          }
-        }
-      ];
+        ];
 
-    // This sets the formatting parameters for the gauge chart
-    var GaugeLayout = {
-        width: 500,
-        height: 400,
-        margin: { t: 25, r: 25, l: 25, b: 25 },  
-        paper_bgcolor: "lavender",
-        font: { color: "darkblue", family: "Arial" }
-    };
+        // This sets the formatting parameters for the gauge chart
+        var GaugeLayout = {
+            width: 500,
+            height: 400,
+            margin: { t: 25, r: 25, l: 25, b: 25 },
+            font: { color: "darkblue", family: "Arial" }
+        };
 
-    // This displays the gauge chart
-    Plotly.newPlot('myDiv', data, layout);
-    }
+        // This displays the gauge chart
+        Plotly.newPlot("gauge", GaugeData, GaugeLayout);
+    });
+}
+
+
+// Create a function that updates all of the plots any time that a new sample is selected, calls on each function we have created
+function ApplyGraphs(subject) {
+    BarGraph(subject);
+    BubbleChart(subject);
+    MetaData(subject);
+    GaugeChart(subject);
+}
+
+// Create a function that initializes the page with a default subject ID
+function start() {
+
+    // Selects an HTML element with the id "selDataset" using D3.js
+    let dropdown = d3.select("#selDataset");
+
+    // This reads in the data from the JSON file using D3
+    d3.json(url).then((data) => {
+        let subjectIDs = data.names;
+
+        // This appends the subject IDs to the dropdown menu
+        subjectIDs.forEach((subject) => {
+            dropdown.append("option").text(subject).property("value", subject);
+        });
+
+        // Find first subjectID
+        const firstSubject = subjectIDs[0];
+
+        // Use the first subjectID to build the initial plots
+        ApplyGraphs(firstSubject);
+
+    });
+}
+
+// This updates the graphs with a new subject
+function optionChanged(subject) {
+    ApplyGraphs(subject);
+}
+
+// Start the page
+start();
